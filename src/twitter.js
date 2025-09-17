@@ -18,7 +18,7 @@ const ELEVENTY_IMG_OPTIONS = {
 	// If you don’t want to check this into your git repository (and want to fetch them in your build)
 	// outputDir: "./_site/img/",
 	outputDir: "./img/",
-	urlPath: "/img/",
+	urlPath: "img/",
 	cacheDuration: "*",
 	filenameFormat: function (id, src, width, format, options) {
 		return `${id}.${format}`;
@@ -40,12 +40,12 @@ class Twitter {
 		let haystack = (tweet.full_text || "");
 
 		// transform text before search
-		if(before && typeof before === "function") {
+		if (before && typeof before === "function") {
 			haystack = before(haystack);
 		}
 
 		let needles = needle;
-		if(!Array.isArray(needle)) {
+		if (!Array.isArray(needle)) {
 			needles = [needle];
 		}
 		return needles.filter(needle => !!haystack.match(new RegExp("\\b" + needle + "\\b", "g" + (!caseSensitive ? "i" : "")))).length > 0;
@@ -56,7 +56,7 @@ class Twitter {
 			return this.isSearchMatch(tweet, searchObj.term, searchObj.caseSensitive, searchObj.before) &&
 				!this.isRetweet(tweet) &&
 				(searchObj.includeReplies || !this.isMention(tweet) && !this.isReply(tweet));
-		}).sort(function(a,b) {
+		}).sort(function (a, b) {
 			return b.date - a.date;
 		});
 	}
@@ -64,8 +64,8 @@ class Twitter {
 	getLinkUrls(tweet) {
 		let links = [];
 
-		if(tweet.entities && tweet.entities.urls) {
-			for(let url of tweet.entities.urls) {
+		if (tweet.entities && tweet.entities.urls) {
+			for (let url of tweet.entities.urls) {
 				try {
 					let urlObj = new URL(url.expanded_url ?? url.url);
 					let parsedDomain = parseDomain(urlObj.host);
@@ -81,8 +81,8 @@ class Twitter {
 						origin: urlObj.origin,
 						domain: domain
 					});
-				} catch(e) {
-					console.log( e );
+				} catch (e) {
+					console.log(e);
 				}
 			}
 		}
@@ -119,12 +119,12 @@ class Twitter {
 		let targetUrl = expandedUrl;
 
 		// Links to my tweets
-		if(displayUrl.startsWith(`https://twitter.com/${metadata.username}/status/`)) {
+		if (displayUrl.startsWith(`https://twitter.com/${metadata.username}/status/`)) {
 			targetUrl = `/${expandedUrl.substr(`https://twitter.com/${metadata.username}/status/`.length)}`;
 		}
 
 		// Links to other tweets
-		if(displayUrl.startsWith("https://twitter.com") && displayUrl.indexOf("/status/") > -1) {
+		if (displayUrl.startsWith("https://twitter.com") && displayUrl.indexOf("/status/") > -1) {
 			displayUrl = displayUrl.substring("https://twitter.com/".length);
 			displayUrl = displayUrl.replace("/status/", "/");
 			displayUrl = `@${displayUrl}`;
@@ -133,13 +133,13 @@ class Twitter {
 			// });
 			className = "tweet-username";
 		} else {
-			if(displayUrl.startsWith("http://")) {
+			if (displayUrl.startsWith("http://")) {
 				displayUrl = displayUrl.substring("http://".length);
 			}
-			if(displayUrl.startsWith("https://")) {
+			if (displayUrl.startsWith("https://")) {
 				displayUrl = displayUrl.substring("https://".length);
 			}
-			if(displayUrl.startsWith("www.")) {
+			if (displayUrl.startsWith("www.")) {
 				displayUrl = displayUrl.substring("www.".length);
 			}
 		}
@@ -160,36 +160,36 @@ class Twitter {
 	async saveVideo(remoteVideoUrl, localVideoPath) {
 		let videoBuffer = await eleventyFetch(remoteVideoUrl, ELEVENTY_VIDEO_OPTIONS);
 
-		if(!fs.existsSync(localVideoPath)) {
+		if (!fs.existsSync(localVideoPath)) {
 			await fsp.writeFile(localVideoPath, videoBuffer);
 		}
 	}
 
 	async getMedia(tweet) {
-		let {transform: twitterLink} = await import("@tweetback/canonical");
+		let { transform: twitterLink } = await import("@tweetback/canonical");
 		let medias = [];
 		let textReplacements = new Map();
 
 		// linkify urls
-		if( tweet.entities ) {
-			for(let url of tweet.entities.urls) {
+		if (tweet.entities) {
+			for (let url of tweet.entities.urls) {
 				// Remove photo URLs
-				if(url.expanded_url && url.expanded_url.indexOf(`/${tweet.id}/photo/`) > -1) {
+				if (url.expanded_url && url.expanded_url.indexOf(`/${tweet.id}/photo/`) > -1) {
 					textReplacements.set(url.url, { html: "" });
 				} else {
-					let {targetUrl, className, displayUrl} = this.getUrlObject(url);
+					let { targetUrl, className, displayUrl } = this.getUrlObject(url);
 					targetUrl = twitterLink(targetUrl);
 
 					textReplacements.set(url.url, { html: `<a href="${targetUrl}" class="${className}" data-pagefind-index-attrs="href">${displayUrl}</a>` });
 
 					// Add opengraph preview
-					if(targetUrl.startsWith("https://") && !targetUrl.startsWith("https://twitter.com/")) {
+					if (targetUrl.startsWith("https://") && !targetUrl.startsWith("https://twitter.com/")) {
 						medias.push(`<template data-island><a href="${targetUrl}"><img src="https://v1.opengraph.11ty.dev/${encodeURIComponent(targetUrl)}/small/onerror/" alt="OpenGraph image for ${displayUrl}" loading="lazy" decoding="async" width="375" height="197" class="tweet-media tweet-media-og" onerror="this.parentNode.remove()"></a></template>`);
 					}
 				}
 			}
 
-			for(let mention of tweet.entities.user_mentions) {
+			for (let mention of tweet.entities.user_mentions) {
 				textReplacements.set(mention.screen_name, {
 					regex: new RegExp(`@${mention.screen_name}`, "i"),
 					html: `<a href="${twitterLink(`https://twitter.com/${mention.screen_name}/`)}" class="tweet-username h-card">@<span class="p-nickname">${mention.screen_name}</span></a>`,
@@ -197,21 +197,21 @@ class Twitter {
 			}
 		}
 
-		if( tweet.extended_entities ) {
-			for(let media of tweet.extended_entities.media ) {
-				if(media.type === "photo") {
+		if (tweet.extended_entities) {
+			for (let media of tweet.extended_entities.media) {
+				if (media.type === "photo") {
 					// remove photo URL
 					textReplacements.set(media.url, { html: "" });
 
 					try {
 						let html = await this.getImage(media.media_url_https, media.alt_text || "");
 						medias.push(html);
-					} catch(e) {
+					} catch (e) {
 						console.log("Image request error", e.message);
 						medias.push(`<a href="${media.media_url_https}">${media.media_url_https}</a>`);
 					}
-				} else if(media.type === "animated_gif" || media.type === "video") {
-					if(media.video_info && media.video_info.variants) {
+				} else if (media.type === "animated_gif" || media.type === "video") {
+					if (media.video_info && media.video_info.variants) {
 						textReplacements.set(media.url, { html: "" });
 
 						let videoResults = media.video_info.variants.filter(video => {
@@ -220,7 +220,7 @@ class Twitter {
 							return parseInt(b.bitrate) - parseInt(a.bitrate);
 						});
 
-						if(videoResults.length === 0) {
+						if (videoResults.length === 0) {
 							continue;
 						}
 
@@ -229,7 +229,7 @@ class Twitter {
 						try {
 							let videoUrl = remoteVideoUrl;
 							let posterStats = await eleventyImg(media.media_url_https, ELEVENTY_IMG_OPTIONS);
-							if(!this.isRetweet(tweet)) {
+							if (!this.isRetweet(tweet)) {
 								videoUrl = `/video/${tweet.id}.mp4`;
 
 								await this.saveVideo(remoteVideoUrl, `.${videoUrl}`)
@@ -237,7 +237,7 @@ class Twitter {
 
 							let imgRef = posterStats.jpeg[0];
 							medias.push(`<video muted controls ${media.type === "animated_gif" ? "loop" : ""} src="${videoUrl}" poster="${imgRef.url}" class="tweet-media u-video"></video>`);
-						} catch(e) {
+						} catch (e) {
 							console.log("Video request error", e.message);
 							medias.push(`<a href="${remoteVideoUrl}">${remoteVideoUrl}</a>`);
 						}
@@ -259,13 +259,13 @@ class Twitter {
 		// replace `*` with <code>*</code>
 		text = text.replace(/\`([^\`]*)\`/g, "<code>$1</code>");
 
-		let {medias, textReplacements} = await this.getMedia(tweet);
+		let { medias, textReplacements } = await this.getMedia(tweet);
 
-		for(let [key, {regex, html}] of textReplacements) {
+		for (let [key, { regex, html }] of textReplacements) {
 			text = text.replace(regex || key, html);
 		}
 
-		if(medias.length) {
+		if (medias.length) {
 			text += `<is-land on:visible><div class="tweet-medias">${medias.join("")}</div></is-land>`;
 		}
 
@@ -288,21 +288,21 @@ class Twitter {
 		return `${d.getFullYear()} ${months[d.getMonth()]} ${d.getDate()}`;
 	}
 
-  renderPercentage(count, total) {
+	renderPercentage(count, total) {
 		return `${(count * 100 / total).toFixed(1)}%`;
 	}
 
 	async renderTweet(tweet, options = {}) {
-		if( !tweet ) {
+		if (!tweet) {
 			return "";
 		}
 
-		let {transform: twitterLink} = await import("@tweetback/canonical");
+		let { transform: twitterLink } = await import("@tweetback/canonical");
 		let sentimentValue = this.getSentiment(tweet);
 
 		let shareCount = parseInt(tweet.retweet_count, 10) + (tweet.quote_count ? tweet.quote_count : 0);
 
-    return `<li id="${tweet.id_str}" class="tweet h-entry${options.class ? ` ${options.class}` : ""}${this.isReply(tweet) && tweet.in_reply_to_screen_name !== metadata.username ? " is_reply " : ""}${this.isRetweet(tweet) ? " is_retweet" : ""}${this.isMention(tweet) ? " is_mention" : ""}" data-pagefind-index-attrs="id">
+		return `<li id="${tweet.id_str}" class="tweet h-entry${options.class ? ` ${options.class}` : ""}${this.isReply(tweet) && tweet.in_reply_to_screen_name !== metadata.username ? " is_reply " : ""}${this.isRetweet(tweet) ? " is_retweet" : ""}${this.isMention(tweet) ? " is_mention" : ""}" data-pagefind-index-attrs="id">
 		${this.isReply(tweet) ? `<a href="${tweet.in_reply_to_screen_name !== metadata.username ? twitterLink(`https://twitter.com/${tweet.in_reply_to_screen_name}/status/${tweet.in_reply_to_status_id_str}`) : `/${tweet.in_reply_to_status_id_str}/`}" class="tweet-pretext u-in-reply-to">…in reply to @${tweet.in_reply_to_screen_name}</a>` : ""}
 			<div class="tweet-text e-content"${options.attributes || ""}>${await this.renderFullText(tweet, options)}</div>
 			<span class="tweet-metadata">
@@ -316,11 +316,11 @@ class Twitter {
 				`.trim() : ""}
 				${tweet.date ? `<time class="tag tag-naked tag-lite dt-published" datetime="${tweet.date.toISOString()}">${this.renderDate(tweet.date)}</time>` : ""}
 				${!this.isRetweet(tweet) ?
-					`<span class="tag tag-naked tag-lite${!options.showSentiment || sentimentValue === 0 ? " sr-only" : ""}">Mood ` +
-						(sentimentValue > 0 ? "+" : "") +
-						`<strong class="tweet-sentiment">${sentimentValue}</strong>` +
-						(sentimentValue > 0 ? " 🙂" : (sentimentValue < 0 ? " 🙁" : "")) +
-					"</span>" : ""}
+				`<span class="tag tag-naked tag-lite${!options.showSentiment || sentimentValue === 0 ? " sr-only" : ""}">Mood ` +
+				(sentimentValue > 0 ? "+" : "") +
+				`<strong class="tweet-sentiment">${sentimentValue}</strong>` +
+				(sentimentValue > 0 ? " 🙂" : (sentimentValue < 0 ? " 🙁" : "")) +
+				"</span>" : ""}
 			</span>
 		</li>`;
 
@@ -328,7 +328,7 @@ class Twitter {
 	}
 
 	async getReplies(tweet, direction = "next") {
-		if( direction === "next" ) {
+		if (direction === "next") {
 			return (await dataSource.getRepliesToId(tweet.id_str)) || [];
 		} else {
 			let replyTweet = await dataSource.getTweetById(tweet && tweet.in_reply_to_status_id_str);
@@ -338,12 +338,12 @@ class Twitter {
 
 	async getReplyHtml(tweet, direction = "next", tweetOptions = {}) {
 		let replies = await this.getReplies(tweet, direction);
-		if(!replies.length) {
+		if (!replies.length) {
 			return "";
 		}
 
 		let repliesHtml = [];
-		for(let replyTweet of replies) {
+		for (let replyTweet of replies) {
 			let tweetHtml = await this.renderTweet(replyTweet, Object.assign({ class: `tweet-${direction}` }, tweetOptions));
 			let previousHtml = direction === "previous" ? await this.getReplyHtml(replyTweet, direction, tweetOptions) : "";
 			let nextHtml = direction === "next" ? await this.getReplyHtml(replyTweet, direction, tweetOptions) : "";
@@ -383,15 +383,15 @@ class Twitter {
 		let top = new Set();
 
 		let topRetweets = topTweets.sort(sortByShareCount).slice(0, limit);
-		for( let tweet of topRetweets) {
+		for (let tweet of topRetweets) {
 			top.add(tweet);
 		}
 
-		let topFavorites = topTweets.sort(function(a,b) {
+		let topFavorites = topTweets.sort(function (a, b) {
 			return parseInt(b.favorite_count, 10) - parseInt(a.favorite_count, 10);
 		}).slice(0, limit);
 
-		for( let tweet of topFavorites) {
+		for (let tweet of topFavorites) {
 			top.add(tweet);
 		}
 

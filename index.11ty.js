@@ -1,7 +1,7 @@
 const swearjar = require("swearjar");
 const metadata = require("./_data/metadata.js");
 const Twitter = require("./src/twitter");
-const EmojiAggregator = require( "./src/EmojiAggregator" );
+const EmojiAggregator = require("./src/EmojiAggregator");
 const dataSource = require("./src/DataSource");
 
 class Index extends Twitter {
@@ -13,14 +13,14 @@ class Index extends Twitter {
 
 	getTopUsersToRetweets(tweets) {
 		let users = {};
-		for(let tweet of tweets) {
-			if(!this.isRetweet(tweet)) {
+		for (let tweet of tweets) {
+			if (!this.isRetweet(tweet)) {
 				continue;
 			}
 
-			if(tweet.entities && tweet.entities.user_mentions && tweet.entities.user_mentions[0]) {
+			if (tweet.entities && tweet.entities.user_mentions && tweet.entities.user_mentions[0]) {
 				let username = tweet.entities.user_mentions[0].screen_name;
-				if(!users[username]) {
+				if (!users[username]) {
 					users[username] = {
 						count: 0,
 						username: username
@@ -35,10 +35,10 @@ class Index extends Twitter {
 
 	getTopReplies(tweets) {
 		let counts = {};
-		for( let tweet of tweets ) {
+		for (let tweet of tweets) {
 			let username = tweet.in_reply_to_screen_name;
-			if(username && username !== metadata.username) {
-				if(!counts[username]) {
+			if (username && username !== metadata.username) {
+				if (!counts[username]) {
 					counts[username] = {
 						count: 0,
 						username: username
@@ -54,12 +54,12 @@ class Index extends Twitter {
 
 	getTopMentions(tweets) {
 		let counts = {};
-		for( let tweet of tweets ) {
-			if(this.isMention(tweet)) {
+		for (let tweet of tweets) {
+			if (this.isMention(tweet)) {
 				let username = tweet.full_text.trim().split(" ").shift();
 				username = username.substr(1);
-				if(username && username !== metadata.username) {
-					if(!counts[username]) {
+				if (username && username !== metadata.username) {
+					if (!counts[username]) {
 						counts[username] = {
 							count: 0,
 							username: username
@@ -83,10 +83,10 @@ class Index extends Twitter {
 		let swears = {};
 
 		let index = 0;
-		for(let split of splits) {
-			if( split.length > 1 && split.match(/[\*]+/) ) {
+		for (let split of splits) {
+			if (split.length > 1 && split.match(/[\*]+/)) {
 				let word = text.substr(index, split.length).toLowerCase();
-				if(!swears[word]) {
+				if (!swears[word]) {
 					swears[word] = 0;
 				}
 				swears[word]++;
@@ -103,8 +103,8 @@ class Index extends Twitter {
 			return !this.isRetweet(tweet) && swearjar.profane(tweet.full_text);
 		}).forEach(tweet => {
 			let swears = this.getSwearWordsFromText(tweet.full_text);
-			for(let swear in swears) {
-				if(!words[swear]) {
+			for (let swear in swears) {
+				if (!words[swear]) {
 					words[swear] = {
 						count: 0,
 						word: swear,
@@ -124,10 +124,10 @@ class Index extends Twitter {
 	getHashTagsFromText(text = "") {
 		let words = {};
 		let splits = text.split(/(\#[A-Za-z][^\s\.\'\"\!\,\?\;\}\{]*)/g);
-		for(let split of splits) {
-			if(split.startsWith("#")) {
+		for (let split of splits) {
+			if (split.startsWith("#")) {
 				let tag = split.substr(1).toLowerCase();
-				if(!words[tag]) {
+				if (!words[tag]) {
 					words[tag] = 0;
 				}
 				words[tag]++;
@@ -142,8 +142,8 @@ class Index extends Twitter {
 			return !this.isRetweet(tweet) && tweet.full_text.indexOf("#");
 		}).forEach(tweet => {
 			let tags = this.getHashTagsFromText(tweet.full_text);
-			for(let tag in tags) {
-				if(!words[tag]) {
+			for (let tag in tags) {
+				if (!words[tag]) {
 					words[tag] = {
 						count: 0,
 						tag: tag,
@@ -162,9 +162,9 @@ class Index extends Twitter {
 
 	getAllLinks(tweets = []) {
 		let links = [];
-		for(let tweet of tweets) {
+		for (let tweet of tweets) {
 			let tweetLinks = this.getLinkUrls(tweet);
-			for(let link of tweetLinks) {
+			for (let link of tweetLinks) {
 				links.push(link);
 			}
 		}
@@ -173,10 +173,10 @@ class Index extends Twitter {
 
 	getTopHosts(tweets = []) {
 		let topHosts = {};
-		for(let tweet of tweets) {
+		for (let tweet of tweets) {
 			let links = this.getLinkUrls(tweet);
-			for(let entry of links) {
-				if(!topHosts[entry.host]) {
+			for (let entry of links) {
+				if (!topHosts[entry.host]) {
 					topHosts[entry.host] = Object.assign({
 						count: 0
 					}, entry);
@@ -186,7 +186,7 @@ class Index extends Twitter {
 		}
 
 		let arr = [];
-		for(let entry in topHosts) {
+		for (let entry in topHosts) {
 			arr.push(topHosts[entry]);
 		}
 
@@ -195,10 +195,10 @@ class Index extends Twitter {
 
 	getTopDomains(tweets = []) {
 		let topDomains = {};
-		for(let tweet of tweets) {
+		for (let tweet of tweets) {
 			let links = this.getLinkUrls(tweet);
-			for(let entry of links) {
-				if(!topDomains[entry.domain]) {
+			for (let entry of links) {
+				if (!topDomains[entry.domain]) {
 					topDomains[entry.domain] = Object.assign({
 						count: 0
 					}, entry);
@@ -208,7 +208,7 @@ class Index extends Twitter {
 		}
 
 		let arr = [];
-		for(let entry in topDomains) {
+		for (let entry in topDomains) {
 			arr.push(topDomains[entry]);
 		}
 
@@ -216,10 +216,10 @@ class Index extends Twitter {
 	}
 
 	async render(data) {
-		let {transform: twitterLink} = await import("@tweetback/canonical");
+		let { transform: twitterLink } = await import("@tweetback/canonical");
 
 		let tweets = await dataSource.getAllTweets();
-		let last12MonthsTweets = tweets.filter(tweet => tweet.date - new Date(Date.now() - 1000*60*60*24*365) > 0);
+		let last12MonthsTweets = tweets.filter(tweet => tweet.date - new Date(Date.now() - 1000 * 60 * 60 * 24 * 365) > 0);
 
 		let tweetCount = tweets.length;
 		let retweetCount = tweets.filter(tweet => this.isRetweet(tweet)).length;
@@ -239,15 +239,15 @@ class Index extends Twitter {
 		let tweetHashCount = topHashes.reduce((accumulator, obj) => accumulator + obj.tweets.length, 0);
 
 		const emoji = new EmojiAggregator();
-		for(let tweet of tweets) {
-			if( !this.isRetweet(tweet) ) {
+		for (let tweet of tweets) {
+			if (!this.isRetweet(tweet)) {
 				emoji.add(tweet);
 			}
 		}
 		let emojis = emoji.getSorted();
-		let mostRecentTweets = tweets.filter(tweet => this.isOriginalPost(tweet)).sort(function(a,b) {
-				return b.date - a.date;
-			}).slice(0, 15);
+		let mostRecentTweets = tweets.filter(tweet => this.isOriginalPost(tweet)).sort(function (a, b) {
+			return b.date - a.date;
+		}).slice(0, 15);
 		let recentTweetsHtml = await Promise.all(mostRecentTweets.map(tweet => this.renderTweet(tweet)));
 		let mostPopularTweetsHtml = await Promise.all(this.getMostPopularTweets(tweets).slice(0, 6).map(tweet => this.renderTweet(tweet, { showPopularity: true })));
 
@@ -268,14 +268,14 @@ class Index extends Twitter {
 				<h2>Search Tweets:</h2>
 				<div class="tweets-search">
 					<div id="search" class="tweets-search"></div>
-					<link href="/_pagefind/pagefind-ui.css" rel="stylesheet">
-					<script src="/_pagefind/pagefind-ui.js" onload="new PagefindUI({ element: '#search', showImages: false });"></script>
+					<link href="${this.url('/_pagefind/pagefind-ui.css')}" rel="stylesheet">
+					<script src="${this.url('/_pagefind/pagefind-ui.js')}" onload="new PagefindUI({ element: '#search', showImages: false });"></script>
 				</div>
 			</template>
 		</is-land>
 
 		<div>
-			<h2><a href="/recent/">Recent:</a></h2>
+			<h2><a href="${this.url('/recent/')}">Recent:</a></h2>
 
 			<ol class="tweets tweets-linear-list h-feed hfeed" id="tweets-recent-home">
 				${recentTweetsHtml.join("")}
@@ -283,7 +283,7 @@ class Index extends Twitter {
 		</div>
 
 		<div>
-			<h2><a href="/popular/">Popular:</a></h2>
+			<h2><a href="${this.url('/popular/')}">Popular:</a></h2>
 			<ol class="tweets tweets-linear-list">
 				${mostPopularTweetsHtml.join("")}
 			</ol>
@@ -361,7 +361,7 @@ class Index extends Twitter {
 		<p><em>${this.renderNumber(swearCount)} swear words on ${this.renderNumber(tweetSwearCount)} tweets (${this.renderPercentage(tweetSwearCount, noRetweetsTweetCount)} of all tweets***)</em></p>
 		<p>***: does not include retweets</p>
 
-		<template id="rendered-twitter-link"><a href="/1234567890123456789/">twitter link</a></template>
+		<template id="rendered-twitter-link"><a href="${this.url('/1234567890123456789/')}">twitter link</a></template>
 `;
 		// <h3>Before 2012, it was not possible to tell the difference between a mention and reply. This happened ${this.renderNumber(ambiguousReplyMentionCount)} times (${this.renderPercentage(ambiguousReplyMentionCount, tweetCount)})</h3>
 

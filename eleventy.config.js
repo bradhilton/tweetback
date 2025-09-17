@@ -45,4 +45,8 @@ module.exports = function (eleventyConfig) {
 			}
 		}
 	});
+
+	return {
+		pathPrefix: "/tweetback/",
+	};
 };
