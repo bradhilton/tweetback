@@ -268,14 +268,14 @@ class Index extends Twitter {
 				<h2>Search Tweets:</h2>
 				<div class="tweets-search">
 					<div id="search" class="tweets-search"></div>
-					<link href="${this.url('/_pagefind/pagefind-ui.css')}" rel="stylesheet">
-					<script src="${this.url('/_pagefind/pagefind-ui.js')}" onload="new PagefindUI({ element: '#search', showImages: false });"></script>
+					<link href="/_pagefind/pagefind-ui.css" rel="stylesheet">
+					<script src="/_pagefind/pagefind-ui.js" onload="new PagefindUI({ element: '#search', showImages: false });"></script>
 				</div>
 			</template>
 		</is-land>
 
 		<div>
-			<h2><a href="${this.url('/recent/')}">Recent:</a></h2>
+			<h2><a href="/recent/">Recent:</a></h2>
 
 			<ol class="tweets tweets-linear-list h-feed hfeed" id="tweets-recent-home">
 				${recentTweetsHtml.join("")}
@@ -283,7 +283,7 @@ class Index extends Twitter {
 		</div>
 
 		<div>
-			<h2><a href="${this.url('/popular/')}">Popular:</a></h2>
+			<h2><a href="/popular/">Popular:</a></h2>
 			<ol class="tweets tweets-linear-list">
 				${mostPopularTweetsHtml.join("")}
 			</ol>
@@ -361,7 +361,7 @@ class Index extends Twitter {
 		<p><em>${this.renderNumber(swearCount)} swear words on ${this.renderNumber(tweetSwearCount)} tweets (${this.renderPercentage(tweetSwearCount, noRetweetsTweetCount)} of all tweets***)</em></p>
 		<p>***: does not include retweets</p>
 
-		<template id="rendered-twitter-link"><a href="${this.url('/1234567890123456789/')}">twitter link</a></template>
+		<template id="rendered-twitter-link"><a href="/1234567890123456789/">twitter link</a></template>
 `;
 		// <h3>Before 2012, it was not possible to tell the difference between a mention and reply. This happened ${this.renderNumber(ambiguousReplyMentionCount)} times (${this.renderPercentage(ambiguousReplyMentionCount, tweetCount)})</h3>
 

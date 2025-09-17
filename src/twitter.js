@@ -18,7 +18,7 @@ const ELEVENTY_IMG_OPTIONS = {
 	// If you don’t want to check this into your git repository (and want to fetch them in your build)
 	// outputDir: "./_site/img/",
 	outputDir: "./img/",
-	urlPath: "img/",
+	urlPath: "/img/",
 	cacheDuration: "*",
 	filenameFormat: function (id, src, width, format, options) {
 		return `${id}.${format}`;
@@ -230,9 +230,9 @@ class Twitter {
 							let videoUrl = remoteVideoUrl;
 							let posterStats = await eleventyImg(media.media_url_https, ELEVENTY_IMG_OPTIONS);
 							if (!this.isRetweet(tweet)) {
-								videoUrl = `/video/${tweet.id}.mp4`;
-
-								await this.saveVideo(remoteVideoUrl, `.${videoUrl}`)
+								const localVideoPath = `/video/${tweet.id}.mp4`;
+								await this.saveVideo(remoteVideoUrl, `.${localVideoPath}`)
+								videoUrl = localVideoPath;
 							}
 
 							let imgRef = posterStats.jpeg[0];

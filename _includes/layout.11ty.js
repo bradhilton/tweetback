@@ -45,18 +45,18 @@ module.exports = async function (data) {
 		<meta name="description" content="${meta_description}" />
 
 		<link rel="profile" href="https://microformats.org/profile/hatom">
-		<link rel="stylesheet" href="${this.url('/assets/style.css')}">
-		<script src="${this.url('/assets/script.js')}" type="module"></script>
-		<script src="${this.url('/assets/is-land.js')}" type="module"></script>
+		<link rel="stylesheet" href="/assets/style.css">
+		<script src="/assets/script.js" type="module"></script>
+		<script src="/assets/is-land.js" type="module"></script>
 
 		${data.page.fileSlug === "newest" ? `
-			<link rel="canonical" href="${this.url('/' + data.tweet.id_str + '/')}">
-			<meta http-equiv="refresh" content="0; url=${this.url('/' + data.tweet.id_str + '/')}">
+			<link rel="canonical" href="/${data.tweet.id_str}/">
+			<meta http-equiv="refresh" content="0; url=/${data.tweet.id_str}/">
 			` : ""}
 	</head>
 	<body>
 		<header>
-		<h1 class="tweets-title"><a href="${this.url('/')}"><img src="${metadata.avatar}" width="52" height="52" alt="${data.metadata.username}’s avatar" class="tweet-avatar">${data.metadata.username}’s Twitter Archive</a>${titleTweetNumberStr}</h1>
+		<h1 class="tweets-title"><a href="/"><img src="${metadata.avatar}" width="52" height="52" alt="${data.metadata.username}’s avatar" class="tweet-avatar">${data.metadata.username}’s Twitter Archive</a>${titleTweetNumberStr}</h1>
 			${!data.hideHeaderTweetsLink ? `<ul class="tweets-nav">
 				<li><a rel="home" href="${data.metadata.homeUrl}">← ${data.metadata.homeLabel}</a></li>
 			</ul>`: ""}
